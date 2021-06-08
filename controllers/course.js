@@ -100,7 +100,6 @@ export const removeImage = async (req, res) => {
 export const create = async (req, res) => {
   try {
     // console.log("create course ===> ", req.body);
-    //------
     var strToThaiSlug = function (str) {
       return str.replace(/\s+/g, '-')           // Replace spaces with -
         .replace('%', 'เปอร์เซนต์')         // Translate some charactor
@@ -113,8 +112,8 @@ export const create = async (req, res) => {
     let slug = strToThaiSlug(req.body.name);
     //------
     const alreadyExist = await Course.findOne({
-     // slug: slugify(req.body.name.toLowerCase()),
-        slug
+      // slug: slugify(req.body.name.toLowerCase()),
+      slug
     }).exec();
     if (alreadyExist) return res.status(400).send("Title is taken");
 
@@ -231,6 +230,18 @@ export const addLesson = async (req, res) => {
   try {
     const { courseId } = req.params;
     const { title, content, video } = req.body;
+
+    var strToThaiSlug = function (str) {
+      return str.replace(/\s+/g, '-')           // Replace spaces with -
+        .replace('%', 'เปอร์เซนต์')         // Translate some charactor
+        .replace(/[^\u0E00-\u0E7F\w\-]+/g, '') // Remove all non-word chars
+        .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+        .replace(/^-+/, '')             // Trim - from start of text
+        .toLowerCase()
+        .replace(/-+$/, '');
+    }
+    let slug = strToThaiSlug(title);
+
     // find post
     const courseFound = await Course.findById(courseId)
       .select("instructor")
@@ -243,7 +254,8 @@ export const addLesson = async (req, res) => {
     let updated = await Course.findByIdAndUpdate(
       courseId,
       {
-        $push: { lessons: { title, content, video, slug: slugify(title) } },
+       // $push: { lessons: { title, content, video, slug: slugify(title) } },
+        $push: { lessons: { title, content, video, slug } },
       },
       { new: true }
     )
