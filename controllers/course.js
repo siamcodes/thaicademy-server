@@ -104,11 +104,21 @@ export const create = async (req, res) => {
       slug: slugify(req.body.name.toLowerCase()),
     }).exec();
     if (alreadyExist) return res.status(400).send("Title is taken");
-
-    
-
+    //------
+    var strToThaiSlug = function (str) {
+      return str.replace(/\s+/g, '-')           // Replace spaces with -
+        .replace('%', 'เปอร์เซนต์')         // Translate some charactor
+        .replace(/[^\u0E00-\u0E7F\w\-]+/g, '') // Remove all non-word chars
+        .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+        .replace(/^-+/, '')             // Trim - from start of text
+        .toLowerCase()
+        .replace(/-+$/, '');
+    }
+    let slug = strToThaiSlug(req.body.name);
+    //------
     const course = await new Course({
-      slug: slugify(req.body.name),
+      // slug: slugify(req.body.name),
+      slug,
       instructor: req.user._id,
       ...req.body,
     }).save();

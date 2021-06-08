@@ -5,7 +5,7 @@ export const create = async (req, res) => {
   try {
     const { name } = req.body;
     // console.log(name);
-
+    //---
     var strToThaiSlug = function (str) {
       return str.replace(/\s+/g, '-')           // Replace spaces with -
         .replace('%', 'เปอร์เซนต์')         // Translate some charactor
@@ -16,9 +16,9 @@ export const create = async (req, res) => {
         .replace(/-+$/, '');
     }
     let slug = strToThaiSlug(name);
-    
+    //----
     const category = await new Category({ name, slug }).save();
-   // const category = await new Category({ name, slug: slugify(name) }).save();
+    // const category = await new Category({ name, slug: slugify(name) }).save();
 
     res.json(category);
   } catch (err) {
