@@ -39,9 +39,21 @@ export const read = async (req, res) => {
 export const update = async (req, res) => {
   try {
     const { name } = req.body;
+    var strToThaiSlug = function (str) {
+      return str.replace(/\s+/g, '-')           // Replace spaces with -
+        .replace('%', 'เปอร์เซนต์')         // Translate some charactor
+        .replace(/[^\u0E00-\u0E7F\w\-]+/g, '') // Remove all non-word chars
+        .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+        .replace(/^-+/, '')             // Trim - from start of text
+        .toLowerCase()
+        .replace(/-+$/, '');
+    }
+    let slug = strToThaiSlug(name);
+
     const category = await Category.findOneAndUpdate(
       { slug: req.params.slug },
-      { name, slug: slugify(name) },
+     // { name, slug: slugify(name) },
+      { name, slug },
       { new: true }
     );
     res.json(category);

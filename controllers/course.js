@@ -112,8 +112,6 @@ export const create = async (req, res) => {
     }
     let slug = strToThaiSlug(req.body.name);
     //------
-
-
     const alreadyExist = await Course.findOne({
      // slug: slugify(req.body.name.toLowerCase()),
         slug
