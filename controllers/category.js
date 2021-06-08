@@ -4,8 +4,22 @@ import slugify from "slugify";
 export const create = async (req, res) => {
   try {
     const { name } = req.body;
-    console.log(name);
-    const category = await new Category({ name, slug: slugify(name) }).save();
+    // console.log(name);
+
+    var strToThaiSlug = function (str) {
+      return str.replace(/\s+/g, '-')           // Replace spaces with -
+        .replace('%', 'เปอร์เซนต์')         // Translate some charactor
+        .replace(/[^\u0E00-\u0E7F\w\-]+/g, '') // Remove all non-word chars
+        .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+        .replace(/^-+/, '')             // Trim - from start of text
+        .toLowerCase()
+        .replace(/-+$/, '');
+    }
+    let slug = strToThaiSlug(name);
+    
+    const category = await new Category({ name, slug }).save();
+   // const category = await new Category({ name, slug: slugify(name) }).save();
+
     res.json(category);
   } catch (err) {
     res.status(400).send("Name is taken");
