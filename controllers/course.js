@@ -100,10 +100,6 @@ export const removeImage = async (req, res) => {
 export const create = async (req, res) => {
   try {
     // console.log("create course ===> ", req.body);
-    const alreadyExist = await Course.findOne({
-      slug: slugify(req.body.name.toLowerCase()),
-    }).exec();
-    if (alreadyExist) return res.status(400).send("Title is taken");
     //------
     var strToThaiSlug = function (str) {
       return str.replace(/\s+/g, '-')           // Replace spaces with -
@@ -116,6 +112,14 @@ export const create = async (req, res) => {
     }
     let slug = strToThaiSlug(req.body.name);
     //------
+
+
+    const alreadyExist = await Course.findOne({
+     // slug: slugify(req.body.name.toLowerCase()),
+        slug
+    }).exec();
+    if (alreadyExist) return res.status(400).send("Title is taken");
+
     const course = await new Course({
       // slug: slugify(req.body.name),
       slug,
