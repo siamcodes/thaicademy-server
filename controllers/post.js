@@ -53,9 +53,22 @@ export const uploadImage = async (req, res) => {
 exports.create = async (req, res) => {
   try {
     const { title, body, categories } = req.body;
+
+    var strToThaiSlug = function (str) {
+      return str.replace(/\s+/g, '-')           // Replace spaces with -
+        .replace('%', 'เปอร์เซนต์')         // Translate some charactor
+        .replace(/[^\u0E00-\u0E7F\w\-]+/g, '') // Remove all non-word chars
+        .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+        .replace(/^-+/, '')             // Trim - from start of text
+        .toLowerCase()
+        .replace(/-+$/, '');
+    }
+    let slug = strToThaiSlug(title);
+
     // check if title is taken
     const alreadyExist = await Post.findOne({
-      slug: slugify(title.toLowerCase()),
+      // slug: slugify(title.toLowerCase()),
+      slug,
     }).exec();
     if (alreadyExist) return res.status(400).send("Title is taken");
 
@@ -74,7 +87,8 @@ exports.create = async (req, res) => {
     setTimeout(async () => {
       const newPost = await new Post({
         title,
-        slug: slugify(title.toLowerCase()),
+        // slug: slugify(title.toLowerCase()),
+        slug,
         body,
         categories: ids,
         postedBy: req.user._id,
@@ -129,6 +143,18 @@ export const read = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     const { postId, title, body, categories } = req.body;
+
+    var strToThaiSlug = function (str) {
+      return str.replace(/\s+/g, '-')           // Replace spaces with -
+        .replace('%', 'เปอร์เซนต์')         // Translate some charactor
+        .replace(/[^\u0E00-\u0E7F\w\-]+/g, '') // Remove all non-word chars
+        .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+        .replace(/^-+/, '')             // Trim - from start of text
+        .toLowerCase()
+        .replace(/-+$/, '');
+    }
+    let slug = strToThaiSlug(title);
+
     // find post
     const foundPost = await Post.findById(postId).select("postedBy").exec();
     // is owner?
@@ -150,7 +176,8 @@ exports.update = async (req, res) => {
         { slug: req.params.slug },
         {
           title,
-          slug: slugify(title),
+          // slug: slugify(title),
+          slug,
           body,
           categories: ids,
         }

@@ -133,9 +133,10 @@ export const create = async (req, res) => {
 };
 
 exports.read = async (req, res) => {
-  // console.log("req.params.slug", req.params.slug);
+  console.log("req.params.slug", req.params.slug);
   try {
     let course = await Course.findOne({ slug: req.params.slug })
+      //const course = await Course.findOne({ slug })
       .populate("instructor", "_id name")
       .populate("categories")
       .exec();
@@ -146,10 +147,30 @@ exports.read = async (req, res) => {
   }
 };
 
+/*
+exports.readPublic = (req, res) => {
+  const slug = req.params.slug.toLowerCase();
+  Course.findOne({ slug })
+    .populate("instructor", "_id name")
+    .populate("categories")
+    //  .populate('categories', '_id name slug')
+    //  .populate('tags', '_id name slug')
+    //  .populate('postedBy', '_id name username')
+    //  .select('_id title body slug mtitle mdesc categories tags postedBy createdAt updatedAt')
+    .exec((err, data) => {
+      if (err) {
+        return res.json({
+          error: errorHandler(err)
+        });
+      }
+      res.json(data);
+    });
+};   */
+
 exports.readPublic = async (req, res) => {
-  // console.log("req.params.slug", req.params.slug);
+  //console.log("req.params.slug", req.params.slug);
   try {
-    let course = await Course.findOne({ slug: req.params.slug })
+    const course = await Course.findOne({ slug: req.params.slug})
       .populate("instructor", "_id name")
       .populate("categories")
       .exec();
@@ -159,6 +180,7 @@ exports.readPublic = async (req, res) => {
     console.log(err);
   }
 };
+
 
 export const uploadVideo = async (req, res) => {
   try {
@@ -254,7 +276,7 @@ export const addLesson = async (req, res) => {
     let updated = await Course.findByIdAndUpdate(
       courseId,
       {
-       // $push: { lessons: { title, content, video, slug: slugify(title) } },
+        // $push: { lessons: { title, content, video, slug: slugify(title) } },
         $push: { lessons: { title, content, video, slug } },
       },
       { new: true }
@@ -585,7 +607,7 @@ export const listCompleted = async (req, res) => {
 export const markIncomplete = async (req, res) => {
   try {
     const { courseId, lessonId } = req.body;
-
+    
     const updated = await Completed.findOneAndUpdate(
       { user: req.user._id, course: courseId },
       {
@@ -598,3 +620,4 @@ export const markIncomplete = async (req, res) => {
     console.log(err);
   }
 };
+

@@ -5,7 +5,6 @@ export const create = async (req, res) => {
   try {
     const { name } = req.body;
     // console.log(name);
-    //---
     var strToThaiSlug = function (str) {
       return str.replace(/\s+/g, '-')           // Replace spaces with -
         .replace('%', 'เปอร์เซนต์')         // Translate some charactor
@@ -84,3 +83,4 @@ export const categories = async (req, res) => {
     console.log(err);
   }
 };
+
