@@ -50,9 +50,80 @@ export const uploadImage = async (req, res) => {
   }
 };
 
+
+export const uploadImageTitle = async (req, res) => {
+  try {
+    const { image } = req.body;
+    if (!image) return res.status(400).send("No image");
+
+    // prepare the image
+    const base64Data = new Buffer.from(
+      image.replace(/^data:image\/\w+;base64,/, ""),
+      "base64"
+    );
+    const type = image.split(";")[0].split("/")[1];
+
+    // image params
+    const params = {
+      Bucket: "somkiat-bucket",
+      Key: `${nanoid()}.${type}`,
+      Body: base64Data,
+      ACL: "public-read",
+      ContentEncoding: "base64",
+      ContentType: `image/${type}`,
+    };
+
+    // upload to s3
+    s3.upload(params, (err, data) => {
+      if (err) {
+        console.log(err);
+        res.sendStatus(400);
+      }
+      console.log(data); // data.Key
+      res.send(data);
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const removeImageTitle = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    // find post
+    const postFound = await Post.findById(postId)
+      .select("postedBy")
+      .exec();
+    // is owner?
+    if (req.user._id != postFound.postedBy._id) {
+      return res.status(400).send("Unauthorized");
+    }
+
+    const { image } = req.body;
+    // console.log("Image ===> ", image);
+    // image params
+    const params = {
+      Bucket: image.Bucket,
+      Key: image.Key,
+    };
+
+    // upload to s3
+    s3.deleteObject(params, (err, data) => {
+      if (err) {
+        console.log(err);
+        res.sendStatus(400);
+      }
+      // console.log(data); // data.Key
+      res.send({ ok: true });
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 exports.create = async (req, res) => {
   try {
-    const { title, body, categories } = req.body;
+    const { title, body, categories, image } = req.body;
 
     var strToThaiSlug = function (str) {
       return str.replace(/\s+/g, '-')           // Replace spaces with -
@@ -90,6 +161,7 @@ exports.create = async (req, res) => {
         // slug: slugify(title.toLowerCase()),
         slug,
         body,
+        image, //
         categories: ids,
         postedBy: req.user._id,
       }).save();
@@ -142,7 +214,7 @@ export const read = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const { postId, title, body, categories } = req.body;
+    const { postId, title, body, categories, image } = req.body;
 
     var strToThaiSlug = function (str) {
       return str.replace(/\s+/g, '-')           // Replace spaces with -
@@ -180,6 +252,7 @@ exports.update = async (req, res) => {
           slug,
           body,
           categories: ids,
+          image //
         }
       );
       res.json({ ok: true });

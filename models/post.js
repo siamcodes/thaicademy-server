@@ -31,6 +31,7 @@ const postSchema = new mongoose.Schema(
       type: String,
       maxlength: 1000,
     },
+    image: {}, //
     categories: [{ type: ObjectId, ref: "Category" }],
     postedBy: {
       type: ObjectId,
