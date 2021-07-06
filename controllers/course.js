@@ -427,6 +427,7 @@ export const courses = async (req, res) => {
     // .select("-lessons")
     .populate("instructor", "_id name")
     .populate("categories", "_id name")
+    .sort({ createdAt: -1 })
     .exec();
   // console.log("============> ", all);
   res.json(all);

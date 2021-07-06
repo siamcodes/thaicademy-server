@@ -30,7 +30,7 @@ const {
 router.post("/post/upload-image", requireSignin, isAuthor, uploadImage);
 
 router.post("/post/upload-image-title", requireSignin, isAuthor, uploadImageTitle); //
-router.post("/post/remove-image-title/:postId", requireSignin, removeImageTitle); //
+router.post("/post/remove-image-title/:postId", requireSignin, isAuthor, removeImageTitle); //
 // post
 router.post("/post", requireSignin, isAuthor, create);
 router.get("/posts", list);

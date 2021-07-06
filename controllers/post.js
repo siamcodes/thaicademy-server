@@ -53,15 +53,15 @@ export const uploadImage = async (req, res) => {
 
 export const uploadImageTitle = async (req, res) => {
   try {
-    const { image } = req.body;
-    if (!image) return res.status(400).send("No image");
+    const { imageTitle } = req.body;
+    if (!imageTitle) return res.status(400).send("No image");
 
     // prepare the image
     const base64Data = new Buffer.from(
-      image.replace(/^data:image\/\w+;base64,/, ""),
+      imageTitle.replace(/^data:image\/\w+;base64,/, ""),
       "base64"
     );
-    const type = image.split(";")[0].split("/")[1];
+    const type = imageTitle.split(";")[0].split("/")[1];
 
     // image params
     const params = {
@@ -91,20 +91,29 @@ export const removeImageTitle = async (req, res) => {
   try {
     const { postId } = req.params;
     // find post
-    const postFound = await Post.findById(postId)
+  /*   const postFound = await Post.findById(postId)
       .select("postedBy")
       .exec();
     // is owner?
     if (req.user._id != postFound.postedBy._id) {
       return res.status(400).send("Unauthorized");
+    } */
+
+    const postFound = await Post.findById(postId)
+     // .select("postedBy")
+      .exec();
+    // is owner?
+    if (req._id != postFound._id) {
+      return res.status(400).send("Unauthorized");
     }
 
-    const { image } = req.body;
+
+    const { imageTitle } = req.body;
     // console.log("Image ===> ", image);
     // image params
     const params = {
-      Bucket: image.Bucket,
-      Key: image.Key,
+      Bucket: imageTitle.Bucket,
+      Key: imageTitle.Key,
     };
 
     // upload to s3
@@ -123,7 +132,7 @@ export const removeImageTitle = async (req, res) => {
 
 exports.create = async (req, res) => {
   try {
-    const { title, body, categories, image } = req.body;
+    const { title, body, categories, imageTitle } = req.body;
 
     var strToThaiSlug = function (str) {
       return str.replace(/\s+/g, '-')           // Replace spaces with -
@@ -161,7 +170,7 @@ exports.create = async (req, res) => {
         // slug: slugify(title.toLowerCase()),
         slug,
         body,
-        image, //
+        imageTitle, //
         categories: ids,
         postedBy: req.user._id,
       }).save();
@@ -194,12 +203,15 @@ export const listForAdmin = async (req, res) => {
       select: "name slug",
     })
     .populate("postedBy", "_id name createdAt")
+    .sort({ createdAt: -1 })
     .exec();
   res.json(posts);
 };
 
 export const postsByAuthor = async (req, res) => {
-  let posts = await Post.find({ postedBy: req.user._id }).exec();
+  let posts = await Post.find({ postedBy: req.user._id })
+  .sort({ createdAt: -1 }) //
+  .exec();
   res.json(posts);
 };
 
@@ -214,8 +226,8 @@ export const read = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const { postId, title, body, categories, image } = req.body;
-
+    const { postId, title, body, categories, imageTitle } = req.body;
+/*
     var strToThaiSlug = function (str) {
       return str.replace(/\s+/g, '-')           // Replace spaces with -
         .replace('%', 'เปอร์เซนต์')         // Translate some charactor
@@ -226,7 +238,7 @@ exports.update = async (req, res) => {
         .replace(/-+$/, '');
     }
     let slug = strToThaiSlug(title);
-
+*/
     // find post
     const foundPost = await Post.findById(postId).select("postedBy").exec();
     // is owner?
@@ -248,11 +260,11 @@ exports.update = async (req, res) => {
         { slug: req.params.slug },
         {
           title,
-          // slug: slugify(title),
-          slug,
+          //slug: slugify(title),
+          //slug,
           body,
+          imageTitle, //
           categories: ids,
-          image //
         }
       );
       res.json({ ok: true });
